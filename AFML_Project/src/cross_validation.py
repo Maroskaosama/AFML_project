@@ -1,8 +1,59 @@
+import warnings
+
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import BaseCrossValidator
-from sklearn.metrics import get_scorer
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    get_scorer,
+    log_loss,
+)
 from sklearn.base import clone
+
+
+def weighted_score(estimator, X, y, sample_weight=None,
+                   scoring="accuracy", labels=None):
+    """
+    Test-fold scoring that honours `sample_weight` for the metrics that
+    accept it.
+
+    Supported names
+    ---------------
+    'accuracy'      : accuracy_score(y, estimator.predict(X), sample_weight=...)
+    'neg_log_loss'  : -log_loss(y, estimator.predict_proba(X),
+                                sample_weight=..., labels=labels or estimator.classes_)
+    'f1'            : f1_score(y, estimator.predict(X),
+                               sample_weight=..., average='binary')
+
+    Anything else falls back to `sklearn.metrics.get_scorer(scoring)` and
+    the call IS NOT WEIGHTED — a UserWarning is emitted so the user knows.
+
+    `sample_weight=None` reproduces the unweighted reference value, which
+    is what we use for the "score_with_weights=False" arm of the
+    four-way validation.
+    """
+    if scoring == "accuracy":
+        y_pred = estimator.predict(X)
+        return float(accuracy_score(y, y_pred, sample_weight=sample_weight))
+
+    if scoring == "neg_log_loss":
+        y_proba = estimator.predict_proba(X)
+        cls = labels if labels is not None else getattr(estimator, "classes_", None)
+        return -float(log_loss(y, y_proba, sample_weight=sample_weight, labels=cls))
+
+    if scoring == "f1":
+        y_pred = estimator.predict(X)
+        return float(f1_score(y, y_pred, sample_weight=sample_weight,
+                              average="binary"))
+
+    warnings.warn(
+        f"weighted_score: scoring={scoring!r} has no weighted path; "
+        "falling back to sklearn get_scorer (sample_weight is ignored).",
+        UserWarning,
+        stacklevel=2,
+    )
+    return float(get_scorer(scoring)(estimator, X, y))
 
 class PurgedKFold(BaseCrossValidator):
     """
@@ -56,41 +107,62 @@ class PurgedKFold(BaseCrossValidator):
             
             yield train_indices, test_indices
 
-def cv_score(clf, X, y, sample_weight, scoring, cv, t1=None):
+def cv_score(clf, X, y, sample_weight, scoring, cv, t1=None,
+             fit_with_weights=True, score_with_weights=True):
     """
-    For each fold: fit clf on train with sample_weight, score on test.
+    For each fold: fit clf on train and score on test, both honouring
+    `sample_weight` by default.
+
+    Parameters
+    ----------
+    clf, X, y, sample_weight, scoring, cv, t1
+        Same positional contract as before, so existing call sites
+        (modelling.py, hyperparameter_tuning.py, feature_importance.py)
+        keep working untouched.
+    fit_with_weights : bool, default True
+        If False, `sample_weight` is NOT passed to `.fit()`. Useful for
+        validation to isolate the effect of weighted scoring vs weighted
+        fitting.
+    score_with_weights : bool, default True
+        If False, the test fold is scored with `sample_weight=None`,
+        which reproduces the legacy (unweighted) behaviour.
+
+    Notes
+    -----
+    `sample_weight=None` makes both flags no-ops. With weights, the
+    default behaviour now matches what AFML Ch 4 / 7 expect: the same
+    sample weights that drove fitting also drive evaluation.
     """
-    if t1 is None and hasattr(cv, 't1'):
+    if t1 is None and hasattr(cv, "t1"):
         t1 = cv.t1
-        
-    scorer = get_scorer(scoring)
+
     scores = []
-    
+
     for train_idx, test_idx in cv.split(X, y):
-        # Slice data
         X_train, y_train = X.iloc[train_idx], y.iloc[train_idx]
         X_test, y_test = X.iloc[test_idx], y.iloc[test_idx]
-        
-        # Slice weights if available
+
         if sample_weight is not None:
-            sw_train = sample_weight.iloc[train_idx]
+            sw_train = sample_weight.iloc[train_idx].values
+            sw_test = sample_weight.iloc[test_idx].values
         else:
             sw_train = None
-            
-        # Clone classifier to avoid fitting the same instance
+            sw_test = None
+
         clf_clone = clone(clf)
-        
-        # Fit
-        if sw_train is not None:
-            clf_clone.fit(X_train, y_train, sample_weight=sw_train.values)
+        if sw_train is not None and fit_with_weights:
+            clf_clone.fit(X_train, y_train, sample_weight=sw_train)
         else:
             clf_clone.fit(X_train, y_train)
-            
-        # Score
-        # For sklearn < 1.4, scorer takes (estimator, X, y_true)
-        score = scorer(clf_clone, X_test, y_test)
+
+        sw_for_score = sw_test if (sw_test is not None and score_with_weights) else None
+        score = weighted_score(
+            clf_clone, X_test, y_test,
+            sample_weight=sw_for_score,
+            scoring=scoring,
+        )
         scores.append(score)
-        
+
     return pd.Series(scores)
 
 class CombinatorialPurgedKFold(BaseCrossValidator):

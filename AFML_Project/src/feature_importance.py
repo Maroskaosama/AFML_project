@@ -20,9 +20,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.base import clone
-from sklearn.metrics import get_scorer
 
-from src.cross_validation import cv_score
+from src.cross_validation import cv_score, weighted_score
 
 
 def feat_imp_MDI(clf, feature_names: Iterable[str]) -> pd.DataFrame:
@@ -67,13 +66,14 @@ def feat_imp_MDA(
 
     For each fold:
       1. Fit `clf` on train (sample-weighted if provided).
-      2. baseline = score(test).
-      3. For each feature j: permute column j of test, re-score.
+      2. baseline = weighted_score(test).
+      3. For each feature j: permute column j of test, re-score with the
+         same test-fold weights.
          delta_j_fold = baseline - permuted_score (positive => feature helps).
-    Returns mean and std of delta_j across folds.
+    Both the baseline and the permuted scores honour the test-fold
+    sample weights so the MDA delta is computed on a like-for-like basis.
     """
     rng = np.random.default_rng(random_state)
-    scorer = get_scorer(scoring)
     feature_names = list(X.columns)
 
     baselines: list[float] = []
@@ -82,7 +82,11 @@ def feat_imp_MDA(
     for train_idx, test_idx in cv.split(X, y):
         X_tr, X_te = X.iloc[train_idx], X.iloc[test_idx]
         y_tr, y_te = y.iloc[train_idx], y.iloc[test_idx]
-        sw_tr = sample_weight.iloc[train_idx].values if sample_weight is not None else None
+        if sample_weight is not None:
+            sw_tr = sample_weight.iloc[train_idx].values
+            sw_te = sample_weight.iloc[test_idx].values
+        else:
+            sw_tr = sw_te = None
 
         candidate = clone(clf)
         if sw_tr is not None:
@@ -90,14 +94,16 @@ def feat_imp_MDA(
         else:
             candidate.fit(X_tr, y_tr)
 
-        baseline = scorer(candidate, X_te, y_te)
+        baseline = weighted_score(candidate, X_te, y_te,
+                                  sample_weight=sw_te, scoring=scoring)
         baselines.append(baseline)
 
         fold_delta = {}
         for col in feature_names:
             X_te_perm = X_te.copy()
             X_te_perm[col] = rng.permutation(X_te_perm[col].values)
-            permuted_score = scorer(candidate, X_te_perm, y_te)
+            permuted_score = weighted_score(candidate, X_te_perm, y_te,
+                                            sample_weight=sw_te, scoring=scoring)
             fold_delta[col] = baseline - permuted_score
         deltas.append(fold_delta)
 
