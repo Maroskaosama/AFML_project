@@ -1,0 +1,52 @@
+{
+  "rf": {
+    "params": {
+      "n_estimators": 200,
+      "min_samples_leaf": 5,
+      "max_features": "sqrt",
+      "max_depth": 7,
+      "class_weight": "balanced_subsample"
+    },
+    "mean_score": 0.5611764705882353,
+    "std_score": 0.09408087516952829,
+    "dsr": {
+      "n_trials": 25,
+      "best_sr": 5.964830467159534,
+      "expected_max_sr": 2.205546859550891,
+      "dsr": 0.9651135251270005,
+      "best_mean": 0.5611764705882353,
+      "best_std": 0.09408087516952829,
+      "best_skew": -0.837607086311853,
+      "best_kurt": 2.2585375045618723
+    }
+  },
+  "xgb": {
+    "params": {
+      "subsample": 0.5,
+      "reg_lambda": 0.1,
+      "n_estimators": 500,
+      "max_depth": 7,
+      "learning_rate": 0.2,
+      "gamma": 0.5,
+      "colsample_bytree": 0.7
+    },
+    "mean_score": 0.5554621848739496,
+    "std_score": 0.08714816479383332,
+    "dsr": {
+      "n_trials": 25,
+      "best_sr": 6.373768009779761,
+      "expected_max_sr": 6.768582628621758,
+      "dsr": 0.4360505423687501,
+      "best_mean": 0.5554621848739496,
+      "best_std": 0.08714816479383332,
+      "best_skew": -0.9119148499010057,
+      "best_kurt": 2.6979717195531
+    }
+  },
+  "meta": {
+    "n_iter_per_model": 25,
+    "cv": "PurgedKFold(n_splits=5, pct_embargo=0.01)",
+    "scoring": "accuracy",
+    "baseline_majority": 0.5672514619883041
+  }
+}

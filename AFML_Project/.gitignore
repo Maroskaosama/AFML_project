@@ -1,0 +1,6 @@
+
+# Local Claude/cache files
+.claude/
+__pycache__/
+*.pyc
+
