@@ -1,0 +1,75 @@
+AFML Pipeline Final Audit — 2026-05-17 21:03
+Universe : ['AAPL', 'AMZN', 'NVDA', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'XOM', 'BAC', 'UNH']
+Period   : 2005-01-03 -> 2025-04-30
+Events   : 2071 (10 stocks)
+Features : 50 total (17 TS + 33 alpha)
+
+Result   : 33/33 checks PASS  |  0 FAIL
+
+Check-by-check:
+  [OK  ] D1 – Panel has all 10 universe tickers
+         tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']
+  [OK  ] D2 – Panel date range covers 2005-01-03 to 2025-04-30
+         range=2005-01-03 -> 2025-04-30
+  [OK  ] D3 – Panel has zero NaN values
+         NaN count=0
+  [OK  ] D4 – Pooled modelling has 2071 events across 10 tickers
+         n=2071  tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']
+  [OK  ] L1 – All 34 leakage checks PASS (Phase 6)
+         PASS=34  WARN=0  FAIL=0
+  [OK  ] L2 – t1 > event_date for all pooled events (no retroactive exits)
+         violations=0
+  [OK  ] L3 – No forward-looking: OOS predictions use only past data
+         fold range=0-4
+  [OK  ] F1 – 50 features total: 17 TS + 33 alpha
+         TS=17  alpha=33
+  [OK  ] F2 – MDI importances sum to ~1.0 (within 1%)
+         MDI sum=1.000000
+  [OK  ] F3 – No single feature dominates MDI > 15%
+         max MDI=0.0500  feature=ret_10d
+  [OK  ] F4 – Top feature by avg tri-method rank is alpha009
+         top feature=alpha009  avg_rank=3.00
+  [OK  ] F5 – Fewer than 5 features have near-zero MDI (correlated ensemble masking expected)
+         near-zero MDI count=2  features=['alpha007', 'alpha027']
+  [OK  ] W1 – All sample weights > 0
+         non-positive count=0
+  [OK  ] W2 – Max weight (clipped at p99) <= 3.5
+         max weight=2.9426
+  [OK  ] W3 – Mean weight in (0.5, 2.0)
+         mean weight=1.0074
+  [OK  ] C1 – Phase 11 OOS accuracy > 0.50
+         OOS acc=0.5601
+  [OK  ] C2 – OOS predictions cover all 2071 events exactly once
+         covered=2071
+  [OK  ] C3 – CPCV mean OOS accuracy > 0.50 (all 15 splits)
+         CPCV mean acc=0.5620
+  [OK  ] C4 – Each event appears in exactly C(K-1,p-1)=5 CPCV test splits
+         appearances: mean=5.00  min=5  max=5
+  [OK  ] M1 – Meta-label class-1 rate matches primary OOS accuracy (within 0.005)
+         meta class1=0.5601  primary acc=0.5601  diff=0.0000
+  [OK  ] M2 – Meta OOS accuracy > 0.50
+         meta OOS acc=0.5191
+  [OK  ] M3 – Meta-filtered profitability >= all-trades profitability
+         meta-filtered=0.5945  all-trades=0.5601  lift=+0.0344
+  [OK  ] B1 – Portfolio_A Sharpe Ratio > 0
+         SR=1.0604
+  [OK  ] B2 – Portfolio_A DSR > 0 (survives multiple-testing correction, N=60)
+         DSR=0.9719
+  [OK  ] B3 – Portfolio_A max drawdown <= 35%
+         max_dd=22.9819%
+  [OK  ] B4 – Portfolio_A annualised return > 0%
+         ann_ret=14.3418%
+  [OK  ] B5 – At least 8/10 tickers have positive SR_A
+         positive SR tickers=10/10  (AAPL:0.72, AMZN:0.52, NVDA:1.26, GOOGL:0.60, JNJ:0.52, JPM:0.75, MSFT:0.89, XOM:0.23, BAC:0.60, UNH:0.73)
+  [OK  ] B6 – NVDA has highest SR_A (top tech performer)
+         NVDA SR=1.2649  max=1.2649
+  [OK  ] R1 – 100% of CPCV paths have SR > 0
+         % positive=100.0%  n_paths=15
+  [OK  ] R2 – CPCV SR std < 0.10 (consistent across resamples)
+         SR std=0.0320
+  [OK  ] R3 – CPCV mean SR within 20% of Phase 13 portfolio SR
+         CPCV mean SR=1.0398  Phase 13 SR=1.0604  ratio=0.9805
+  [OK  ] A1 – All 14 required data artifacts exist
+         all present
+  [OK  ] A2 – All key phase figures (10-14) exist
+         checked 10 figs
