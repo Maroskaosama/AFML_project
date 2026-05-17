@@ -1,0 +1,14 @@
+Phase,Title,Key Artifact,Summary
+Phase 3,Data Acquisition,panel_ohlcv.parquet,"10 stocks, 2005-2025, 51,138 panel rows, 0 NaN"
+Phase 4,Per-Stock AFML Pipeline,per_stock/*.parquet,CUSUM events + triple-barrier labels + sample weights + fracdiff
+Phase 5,101 Alpha Engine,panel_alpha_features_pruned.parquet,"101 computed → 33 selected (excl NaN>40%, prune |r|>0.85, budget 33)"
+Phase 6,Leakage Validation,leakage_audit.parquet,"34 checks — 34 PASS, 0 FAIL, 0 WARN"
+Phase 7,MultiAsset Purged CV,cv_baseline_multistock.parquet,"MultiAssetPurgedKFold 5-fold: TS acc=0.5385, full-50 acc=0.5136"
+Phase 8,Weight Investigation,pooled_modelling.parquet (updated),Clipped at p99=3.12; 23 events affected; CV unchanged
+Phase 9,Notebook Reconstruction,notebooks 06/07/08/15/16,Updated to MultiAssetPurgedKFold + pooled dataset; 2 new overview notebooks
+Phase 10,Visualizations,reports/figures/phase10_*.png,"12 diagnostic figures: price history, CUSUM, labels, weights, features, CV"
+Phase 11,Final Modelling,oos_predictions_pooled.parquet,MDI/MDA/SFI + HP tuning (30 trials each); RF OOS acc=0.5601; DSR=0.9589
+Phase 12,Meta-Labeling,meta_oos_predictions_pooled.parquet,Secondary RF; meta acc=0.5191; profitability lift +0.0344
+Phase 13,Backtesting,backtest_stats_pooled.parquet,"Strategy A: portfolio SR=1.0604, DSR=0.9719, ann_ret=14.34%"
+Phase 14,CPCV Robustness,cpcv_paths_pooled.parquet,"K=6,p=2; 15 paths; mean SR=1.0398, std=0.0320; 100% paths SR>0"
+Phase 15,Final Audit,final_audit_pooled.parquet,"33/33 checks PASS across 9 groups (D,L,F,W,C,M,B,R,A)"

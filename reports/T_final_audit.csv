@@ -1,0 +1,34 @@
+group,name,status,detail
+D1,Panel has all 10 universe tickers,PASS,"tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']"
+D2,Panel date range covers 2005-01-03 to 2025-04-30,PASS,range=2005-01-03 -> 2025-04-30
+D3,Panel has zero NaN values,PASS,NaN count=0
+D4,Pooled modelling has 2071 events across 10 tickers,PASS,"n=2071  tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']"
+L1,All 34 leakage checks PASS (Phase 6),PASS,PASS=34  WARN=0  FAIL=0
+L2,t1 > event_date for all pooled events (no retroactive exits),PASS,violations=0
+L3,No forward-looking: OOS predictions use only past data,PASS,fold range=0-4
+F1,50 features total: 17 TS + 33 alpha,PASS,TS=17  alpha=33
+F2,MDI importances sum to ~1.0 (within 1%),PASS,MDI sum=1.000000
+F3,No single feature dominates MDI > 15%,PASS,max MDI=0.0500  feature=ret_10d
+F4,Top feature by avg tri-method rank is alpha009,PASS,top feature=alpha009  avg_rank=3.00
+F5,Fewer than 5 features have near-zero MDI (correlated ensemble masking expected),PASS,"near-zero MDI count=2  features=['alpha007', 'alpha027']"
+W1,All sample weights > 0,PASS,non-positive count=0
+W2,Max weight (clipped at p99) <= 3.5,PASS,max weight=2.9426
+W3,"Mean weight in (0.5, 2.0)",PASS,mean weight=1.0074
+C1,Phase 11 OOS accuracy > 0.50,PASS,OOS acc=0.5601
+C2,OOS predictions cover all 2071 events exactly once,PASS,covered=2071
+C3,CPCV mean OOS accuracy > 0.50 (all 15 splits),PASS,CPCV mean acc=0.5620
+C4,"Each event appears in exactly C(K-1,p-1)=5 CPCV test splits",PASS,appearances: mean=5.00  min=5  max=5
+M1,Meta-label class-1 rate matches primary OOS accuracy (within 0.005),PASS,meta class1=0.5601  primary acc=0.5601  diff=0.0000
+M2,Meta OOS accuracy > 0.50,PASS,meta OOS acc=0.5191
+M3,Meta-filtered profitability >= all-trades profitability,PASS,meta-filtered=0.5945  all-trades=0.5601  lift=+0.0344
+B1,Portfolio_A Sharpe Ratio > 0,PASS,SR=1.0604
+B2,"Portfolio_A DSR > 0 (survives multiple-testing correction, N=60)",PASS,DSR=0.9719
+B3,Portfolio_A max drawdown <= 35%,PASS,max_dd=22.9819%
+B4,Portfolio_A annualised return > 0%,PASS,ann_ret=14.3418%
+B5,At least 8/10 tickers have positive SR_A,PASS,"positive SR tickers=10/10  (AAPL:0.72, AMZN:0.52, NVDA:1.26, GOOGL:0.60, JNJ:0.52, JPM:0.75, MSFT:0.89, XOM:0.23, BAC:0.60, UNH:0.73)"
+B6,NVDA has highest SR_A (top tech performer),PASS,NVDA SR=1.2649  max=1.2649
+R1,100% of CPCV paths have SR > 0,PASS,% positive=100.0%  n_paths=15
+R2,CPCV SR std < 0.10 (consistent across resamples),PASS,SR std=0.0320
+R3,CPCV mean SR within 20% of Phase 13 portfolio SR,PASS,CPCV mean SR=1.0398  Phase 13 SR=1.0604  ratio=0.9805
+A1,All 14 required data artifacts exist,PASS,all present
+A2,All key phase figures (10-14) exist,PASS,checked 10 figs
