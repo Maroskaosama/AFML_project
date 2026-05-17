@@ -1,0 +1,28 @@
+{
+  "tickers": [
+    "AAPL",
+    "AMZN",
+    "NVDA",
+    "GOOGL",
+    "JNJ",
+    "JPM",
+    "MSFT",
+    "XOM",
+    "META",
+    "TSLA"
+  ],
+  "sectors": {
+    "AAPL": "Information Technology",
+    "AMZN": "Consumer Discretionary",
+    "NVDA": "Information Technology",
+    "GOOGL": "Communication Services",
+    "JNJ": "Health Care",
+    "JPM": "Financials",
+    "MSFT": "Information Technology",
+    "XOM": "Energy",
+    "META": "Communication Services",
+    "TSLA": "Consumer Discretionary"
+  },
+  "common_start_date": "2012-05-18",
+  "common_end_date": "2025-04-30"
+}

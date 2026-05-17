@@ -1,0 +1,57 @@
+{
+  "tickers": ["AAPL", "AMZN", "NVDA", "GOOGL", "JNJ", "JPM", "MSFT", "XOM", "BAC", "UNH"],
+  "sectors": {
+    "AAPL": "Information Technology",
+    "AMZN": "Consumer Discretionary",
+    "NVDA": "Information Technology",
+    "GOOGL": "Communication Services",
+    "JNJ": "Health Care",
+    "JPM": "Financials",
+    "MSFT": "Information Technology",
+    "XOM": "Energy",
+    "BAC": "Financials",
+    "UNH": "Health Care"
+  },
+  "sector_codes": {
+    "AAPL": "IT",
+    "AMZN": "CD",
+    "NVDA": "IT",
+    "GOOGL": "CS",
+    "JNJ": "HC",
+    "JPM": "FN",
+    "MSFT": "IT",
+    "XOM": "EN",
+    "BAC": "FN",
+    "UNH": "HC"
+  },
+  "common_start": "2005-01-03",
+  "common_end": "2025-04-30",
+  "cusum_params": {
+    "method": "adaptive_vol",
+    "target_events_range": [200, 600]
+  },
+  "labeling_params": {
+    "pt_sl": [1, 1],
+    "vertical_days": 10,
+    "vol_span": 50
+  },
+  "fracdiff_params": {
+    "threshold": 1e-5,
+    "adf_pvalue": 0.05,
+    "min_corr": 0.85
+  },
+  "cv_params": {
+    "n_splits": 5,
+    "pct_embargo": 0.01
+  },
+  "alpha_params": {
+    "max_nan_pct": 0.40,
+    "min_std": 1e-8,
+    "max_corr": 0.85,
+    "max_alphas": 33
+  },
+  "backtest_params": {
+    "cost_bps": 5,
+    "step_size": 0.1
+  }
+}
