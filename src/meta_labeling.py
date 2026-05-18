@@ -137,27 +137,38 @@ def make_meta_labels(
     DataFrame indexed by event time with columns:
         side, pred_prob, fold, ret, original_label, meta_label
     """
-    # Align labels to OOS predictions (both indexed by event time)
-    common_idx = oos_preds.index.intersection(labels.index)
-    if len(common_idx) < len(oos_preds):
-        print(f"[meta-label] Warning: {len(oos_preds) - len(common_idx)} events "
+    # Align labels to OOS predictions (both indexed by event time).
+    # Pooled (multi-stock) datasets have non-unique date indices; intersection()
+    # returns unique values only, causing shape mismatches.  Filter both to
+    # common event dates then align positionally.
+    common_dates = oos_preds.index.intersection(labels.index)
+    n_dropped = oos_preds.index.nunique() - len(common_dates)
+    if n_dropped > 0:
+        print(f"[meta-label] Warning: {n_dropped} unique event dates "
               "not found in labels parquet; dropping them.")
 
-    ret = labels.loc[common_idx, "ret"]
-    side = oos_preds.loc[common_idx, "side"]
+    oos_sub = oos_preds[oos_preds.index.isin(common_dates)]
+    lab_sub = labels[labels.index.isin(common_dates)]
 
-    # AFML §3.7 — meta-label is 1 if trade in predicted direction was profitable
-    aligned_product = ret * side
+    if len(oos_sub) != len(lab_sub):
+        raise ValueError(
+            f"[meta-label] Shape mismatch after filtering: "
+            f"oos_sub={len(oos_sub)}, lab_sub={len(lab_sub)}. "
+            "Ensure oos_preds and labels share the same event index."
+        )
+
+    # Use .values to avoid label-based reindex errors with duplicate dates
+    aligned_product = lab_sub["ret"].values * oos_sub["side"].values
     meta_label = (aligned_product > 0).astype(int)
 
     result = pd.DataFrame({
-        "side":           side,
-        "pred_prob":      oos_preds.loc[common_idx, "pred_prob"],
-        "fold":           oos_preds.loc[common_idx, "fold"],
-        "ret":            ret,
-        "original_label": labels.loc[common_idx, "bin"],
+        "side":           oos_sub["side"].values,
+        "pred_prob":      oos_sub["pred_prob"].values,
+        "fold":           oos_sub["fold"].values,
+        "ret":            lab_sub["ret"].values,
+        "original_label": lab_sub["bin"].values,
         "meta_label":     meta_label,
-    }, index=common_idx)
+    }, index=oos_sub.index)
 
     dist = result["meta_label"].value_counts().to_dict()
     n = len(result)

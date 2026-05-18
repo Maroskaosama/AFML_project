@@ -10,3 +10,6 @@ __pycache__/
 .claude/
 .ipynb_checkpoints/
 
+
+# Auto-added by reorganize.py
+notebooks/outputs/

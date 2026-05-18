@@ -126,11 +126,17 @@ def alpha006(data, sector_map):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def alpha007(data, sector_map):
-    """Alpha#7: ((adv20 < volume) ? ((-1 * ts_rank(abs(delta(close, 7)), 60)) * sign(delta(close, 7))) : (-1))"""
+    """Alpha#7: ((adv20 < volume) ? ((-1 * ts_rank(abs(delta(close, 7)), 60)) * sign(delta(close, 7))) : (-1))
+
+    Note: 'volume' in the original formula refers to dollar volume (close*vol),
+    not share volume.  adv20 is also dollar volume, so compare like to like.
+    """
     close = data['close']
     volume = data['volume']
     adv20 = data['adv20']
-    cond = adv20 < volume
+    # Today's dollar volume vs 20-day average dollar volume
+    dollar_vol_today = close * volume
+    cond = adv20 < dollar_vol_today
     branch_true = (-1 * ts_rank(abs_val(delta(close, 7)), 60)) * sign(delta(close, 7))
     branch_false = pd.DataFrame(-1.0, index=close.index, columns=close.columns)
     result = branch_true.where(cond, branch_false)

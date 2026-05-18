@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.metrics import (
     accuracy_score,
+    balanced_accuracy_score,
     f1_score,
     get_scorer,
     log_loss,
@@ -41,6 +42,10 @@ def weighted_score(estimator, X, y, sample_weight=None,
         y_proba = estimator.predict_proba(X)
         cls = labels if labels is not None else getattr(estimator, "classes_", None)
         return -float(log_loss(y, y_proba, sample_weight=sample_weight, labels=cls))
+
+    if scoring == "balanced_accuracy":
+        y_pred = estimator.predict(X)
+        return float(balanced_accuracy_score(y, y_pred, sample_weight=sample_weight))
 
     if scoring == "f1":
         y_pred = estimator.predict(X)

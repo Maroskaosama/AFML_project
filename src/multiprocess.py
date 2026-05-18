@@ -146,7 +146,7 @@ def mp_pandas_obj(func, pd_obj, num_threads: int = 1,
 
 def _vol_molecule_worker(molecule, close, span: int = 50):
     """Compute get_daily_vol for a molecule sub-index. Module-level so it is picklable on Windows."""
-    from labeling import get_daily_vol
+    from src.labeling import get_daily_vol
     return get_daily_vol(close, span=span).reindex(molecule)
 
 

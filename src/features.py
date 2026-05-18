@@ -96,11 +96,14 @@ def compute_microstructure_features(df: pd.DataFrame) -> pd.DataFrame:
     # Bekker-Parkinson vol
     features['bekker_parkinson_vol'] = (1.0 / (4 * np.log(2))) * H_L
     
-    # Amihud illiquidity
+    # Amihud illiquidity — log-transformed because raw values are O(1e-11) for
+    # large-cap stocks (|ret|/dollar_volume), making tree splits numerically
+    # unstable without scaling.
     ret = np.abs(np.log(close / close.shift(1)))
     dollar_vol = close * df['Volume']
     amihud = ret / dollar_vol.replace(0, np.nan)
-    features['amihud_illiquidity'] = amihud.rolling(window=20).mean()
+    amihud_raw = amihud.rolling(window=20).mean()
+    features['amihud_illiquidity'] = np.log(amihud_raw.clip(lower=1e-20))
     
     # Roll spread
     dp = close.diff()

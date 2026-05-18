@@ -1,16 +1,16 @@
 ,Backtest Statistics
-Start Date,2005-01-04
+Start Date,2005-01-03
 End Date,2025-04-30
-Total Days,5113
-Annualised Return,1.8928%
-Annualised Volatility,6.4440%
-Sharpe Ratio,0.2910
-PSR (SR*=0),0.9055
-DSR (N=50),0.1678
-Max Drawdown,23.5766%
-Time Under Water (d),1004
-Calmar Ratio,0.0803
-Hit Ratio,52.4902%
-Profit Factor,1.1077
-Peak Date,2021-07-06
-Trough Date,2024-08-07
+Total Days,5114
+Annualised Return,0.4395%
+Annualised Volatility,3.3890%
+Sharpe Ratio,0.1294
+PSR (SR*=0),0.7206
+DSR (N=50),0.0454
+Max Drawdown,18.0670%
+Time Under Water (d),3945
+Calmar Ratio,0.0243
+Hit Ratio,46.9626%
+Profit Factor,1.0588
+Peak Date,2023-09-14
+Trough Date,2014-03-27
