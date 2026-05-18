@@ -191,25 +191,46 @@ for ticker in TICKERS:
     rows.append(stats_row(f'{ticker}_A', returns_A[ticker]))
     rows.append(stats_row(f'{ticker}_B', returns_B[ticker]))
 
+# ── Buy-and-hold baseline ─────────────────────────────────────────────────────
+# Equal-weight buy-and-hold over the same date range as the strategy
+bnh_start = min(port_A.index.min(), port_B.index.min())
+bnh_end   = max(port_A.index.max(), port_B.index.max())
+bnh_prices = adj_close.loc[bnh_start:bnh_end, TICKERS].dropna(how='all')
+bnh_ret_wide = np.log(bnh_prices / bnh_prices.shift(1)).dropna(how='all')
+port_BnH = bnh_ret_wide.mean(axis=1)   # equal-weight daily log-return
+
+print(f'  Buy-and-hold SR: {sharpe_ratio(port_BnH, PPY):+.4f}  '
+      f'(period {bnh_start.date()} → {bnh_end.date()})')
+
 # Portfolio stats
-rows.append(stats_row('Portfolio_A', port_A))
-rows.append(stats_row('Portfolio_B', port_B))
+rows.append(stats_row('Portfolio_A',   port_A))
+rows.append(stats_row('Portfolio_B',   port_B))
+rows.append(stats_row('BuyAndHold_EW', port_BnH))
 
 stats_df = pd.DataFrame(rows).set_index('strategy')
 
 print('\n  Per-ticker + portfolio stats:')
 print(stats_df[['sr', 'psr', 'dsr', 'max_dd', 'calmar', 'hit_ratio', 'profit_factor']].round(4).to_string())
 
-print('\n  Portfolio summary:')
-for col in ['sr', 'psr', 'dsr', 'max_dd', 'max_tuw', 'calmar', 'hit_ratio', 'profit_factor', 'ann_return', 'ann_vol']:
-    va = stats_df.loc['Portfolio_A', col]
-    vb = stats_df.loc['Portfolio_B', col]
-    print(f'    {col:20s}: A={va:.4f}  B={vb:.4f}')
+bnh_sr = stats_df.loc['BuyAndHold_EW', 'sr']
+print('\n  Portfolio summary (vs Buy-and-Hold equal-weight):')
+print(f'  {"Metric":20s}  {"Strat A":>9}  {"Strat B":>9}  {"B&H EW":>9}')
+print(f'  {"-"*20}  {"-"*9}  {"-"*9}  {"-"*9}')
+for col in ['sr', 'dsr', 'max_dd', 'calmar', 'hit_ratio', 'ann_return', 'ann_vol']:
+    va   = stats_df.loc['Portfolio_A',   col]
+    vb   = stats_df.loc['Portfolio_B',   col]
+    vbnh = stats_df.loc['BuyAndHold_EW', col]
+    print(f'  {col:20s}  {va:+9.4f}  {vb:+9.4f}  {vbnh:+9.4f}')
+
+alpha_a = stats_df.loc['Portfolio_A', 'sr'] - bnh_sr
+alpha_b = stats_df.loc['Portfolio_B', 'sr'] - bnh_sr
+print(f'\n  Strategy alpha over B&H: A={alpha_a:+.4f}  B={alpha_b:+.4f}')
 
 # Save
 all_returns = pd.concat(
     [ret_df_A.add_suffix('_A'), ret_df_B.add_suffix('_B'),
-     port_A.rename('Portfolio_A'), port_B.rename('Portfolio_B')],
+     port_A.rename('Portfolio_A'), port_B.rename('Portfolio_B'),
+     port_BnH.rename('BuyAndHold_EW')],
     axis=1,
 )
 all_returns.to_parquet('data/processed/backtest_returns_pooled.parquet')
@@ -230,13 +251,16 @@ dd_series_B = 1 - (1 + port_B).cumprod() / (1 + port_B).cumprod().expanding().ma
 
 fig, axes = plt.subplots(2, 1, figsize=(14, 9), sharex=True)
 
+cum_BnH = (1 + port_BnH.reindex(cum_A.index).fillna(0)).cumprod()
 axes[0].plot(cum_A.index, cum_A.values, color='steelblue', linewidth=1.2,
              label=f'A: Primary (SR={stats_df.loc["Portfolio_A","sr"]:.3f})')
 axes[0].plot(cum_B.index, cum_B.values, color='darkorange', linewidth=1.2,
              label=f'B: Meta-sized (SR={stats_df.loc["Portfolio_B","sr"]:.3f})')
+axes[0].plot(cum_BnH.index, cum_BnH.values, color='grey', linewidth=1.0,
+             linestyle='--', label=f'B&H EW (SR={stats_df.loc["BuyAndHold_EW","sr"]:.3f})')
 axes[0].set_ylabel('Cumulative return (equity curve)')
 axes[0].set_title('10-Stock Equal-Weight Portfolio — Equity Curves\n'
-                  f'Strategy A (primary ±1) vs B (meta disc_signal), cost={COST_BPS}bps')
+                  f'Strategy A (primary ±1) vs B (meta disc_signal) vs Buy-and-Hold, cost={COST_BPS}bps')
 axes[0].legend(loc='upper left')
 axes[0].axhline(1.0, color='grey', linestyle=':', alpha=0.5)
 
