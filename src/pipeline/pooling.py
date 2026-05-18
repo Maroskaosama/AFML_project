@@ -24,13 +24,15 @@ def build_pooled_modelling_dataset(
     common_start: str,
     common_end: str,
     output_path: Optional[str] = None,
+    macro_features: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """
     Merge per-stock {ticker}_ts_features + selected alpha features
     + {ticker}_labels + {ticker}_weights into one pooled DataFrame.
 
     Each row is one event. Index = event date (DatetimeIndex).
-    Columns = [17 TS features] + [N alpha features] + [label, t1, weight, ticker].
+    Columns = [TS features] + [macro features (opt)] + [alpha features]
+              + [label, t1, weight, ticker].
 
     Parameters
     ----------
@@ -40,6 +42,8 @@ def build_pooled_modelling_dataset(
     selected_alphas : list of alpha column names to include
     common_start, common_end : date range filter strings
     output_path : if given, save result to this parquet path
+    macro_features : optional date-indexed DataFrame of macro regime features
+        (same value for all tickers on a given date); aligned by reindex + ffill
 
     Returns
     -------
@@ -105,13 +109,11 @@ def build_pooled_modelling_dataset(
         weight_series = weights.iloc[:, 0].rename('weight') if weights.shape[1] > 0 \
                         else pd.Series(1.0, index=labels.index, name='weight')
 
-        row = pd.concat([
-            ts_feat[ts_cols],
-            alpha_aligned,
-            label_series,
-            t1_col.rename('t1'),
-            weight_series,
-        ], axis=1)
+        parts = [ts_feat[ts_cols]]
+        if macro_features is not None:
+            parts.append(macro_features.reindex(labels.index))
+        parts += [alpha_aligned, label_series, t1_col.rename('t1'), weight_series]
+        row = pd.concat(parts, axis=1)
 
         row['ticker'] = ticker
         row = row.dropna()

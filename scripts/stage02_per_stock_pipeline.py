@@ -98,6 +98,7 @@ for ticker in TICKERS:
             corr_threshold = 0.85,
             verbose        = True,
             cusum_start    = COMMON_START,
+            min_ret        = 0.005,  # Wave-1: drop |ret| < 0.5% noise labels
         )
         elapsed = time.time() - t0
         results[ticker] = r

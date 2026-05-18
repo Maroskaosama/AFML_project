@@ -155,8 +155,8 @@ mdi_sum = fi_df['MDI_mean'].sum()
 mdi_top = float(fi_df['MDI_mean'].max())
 top_by_rank = fi_df.nsmallest(1, 'avg_rank').index[0]
 
-check('F1', '50 features total: 17 TS + 33 alpha',
-      len(ts_cols) == 17 and len(alpha_cols) == 33,
+check('F1', '54 features total: 21 TS (17 per-stock + 4 macro) + 33 alpha',
+      len(ts_cols) == 21 and len(alpha_cols) == 33,
       f'TS={len(ts_cols)}  alpha={len(alpha_cols)}')
 
 check('F2', 'MDI importances sum to ~1.0 (within 1%)',

@@ -18,6 +18,8 @@ intraday quantities described in AFML Ch 19. In particular:
   the input at 0 so the square root is real, equivalent to reporting
   "no estimable spread" for that window.
 """
+import os
+
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -210,6 +212,66 @@ def compute_entropy_features(returns: pd.Series, window: int = 50) -> pd.DataFra
     )
     
     return features
+
+def compute_macro_features(
+    date_index: pd.DatetimeIndex,
+    cache_path: str = None,
+) -> pd.DataFrame:
+    """
+    Download and return macro regime features aligned to date_index.
+
+    Features
+    --------
+    vix_level         : daily VIX close
+    vix_5d_chg        : 5-day % change in VIX
+    spy_20d_ret       : 20-day log return of SPY
+    yield_curve_slope : ^TNX (10-year) minus ^IRX (3-month T-bill), in % points
+
+    All columns are shifted forward by 1 trading day so that the value
+    used for an event on day t is the macro state at end of day t-1.
+
+    Parameters
+    ----------
+    date_index : DatetimeIndex of event dates to align to (ffill used for gaps)
+    cache_path : if given, load from parquet if it exists, else save after download
+    """
+    import yfinance as yf
+
+    if cache_path and os.path.exists(cache_path):
+        macro = pd.read_parquet(cache_path)
+        return macro.reindex(date_index).ffill()
+
+    start = str((pd.Timestamp(date_index.min()) - pd.Timedelta(days=90)).date())
+    end   = str((pd.Timestamp(date_index.max()) + pd.Timedelta(days=10)).date())
+
+    def _dl(ticker):
+        raw = yf.download(ticker, start=start, end=end, auto_adjust=False, progress=False)
+        if isinstance(raw.columns, pd.MultiIndex):
+            raw.columns = raw.columns.get_level_values(0)
+        return raw['Close'].rename(ticker)
+
+    vix = _dl('^VIX')
+    spy = _dl('SPY')
+    tnx = _dl('^TNX')   # 10-year Treasury yield (% annualised)
+    irx = _dl('^IRX')   # 13-week T-bill yield (short-rate proxy)
+
+    idx = vix.index
+    macro = pd.DataFrame(index=idx)
+    macro['vix_level']          = vix
+    macro['vix_5d_chg']         = vix.pct_change(5)
+    spy_r                       = spy.reindex(idx).ffill()
+    macro['spy_20d_ret']        = np.log(spy_r / spy_r.shift(20))
+    macro['yield_curve_slope']  = tnx.reindex(idx).ffill() - irx.reindex(idx).ffill()
+
+    # Shift 1 trading day: event at open of day t uses macro state at close of t-1
+    macro = macro.shift(1)
+
+    if cache_path:
+        os.makedirs(os.path.dirname(os.path.abspath(cache_path)), exist_ok=True)
+        macro.to_parquet(cache_path)
+
+    return macro.reindex(date_index).ffill()
+
 
 def build_feature_matrix(df: pd.DataFrame, fracdiff: pd.Series, events: pd.DataFrame, labels: pd.DataFrame, weights: pd.DataFrame) -> pd.DataFrame:
     close = df['Adj Close']

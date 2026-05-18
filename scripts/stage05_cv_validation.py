@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 from src.pipeline.pooling     import build_pooled_modelling_dataset
 from src.cross_validation     import MultiAssetPurgedKFold, cv_score
+from src.features             import compute_macro_features
 
 from sklearn.ensemble         import RandomForestClassifier
 
@@ -40,11 +41,28 @@ CV_RESULTS_PATH = 'data/processed/cv_baseline_multistock.parquet'
 
 ERRORS = []
 
+MACRO_PATH = 'data/processed/macro_features.parquet'
+
 def sep(title=''):
     print('\n' + '=' * 68)
     if title:
         print(title)
         print('=' * 68)
+
+
+# ── Step 0: Compute / load macro regime features ─────────────────────────────
+sep('STEP 0: Macro regime features (VIX, SPY, yield curve)')
+
+panel_dates = (
+    pd.read_parquet('data/processed/panel_ohlcv.parquet')
+    .index.get_level_values('Date').unique()
+)
+
+macro_df = compute_macro_features(panel_dates, cache_path=MACRO_PATH)
+print(f'  Macro features : {macro_df.shape}')
+print(f'  Columns        : {list(macro_df.columns)}')
+print(f'  Date range     : {macro_df.index.min().date()} → {macro_df.index.max().date()}')
+print(f'  NaN per column : {macro_df.isnull().sum().to_dict()}')
 
 
 # ── Step 1: Build pooled modelling dataset ───────────────────────────────────
@@ -59,6 +77,7 @@ modelling = build_pooled_modelling_dataset(
     common_start    = COMMON_START,
     common_end      = COMMON_END,
     output_path     = MODELLING_PATH,
+    macro_features  = macro_df,
 )
 elapsed = time.time() - t0
 
@@ -298,13 +317,25 @@ check(f'D1: TS-only mean acc ({ts_mean_acc:.4f}) > 0.50 (random)',
 check(f'D2: TS+alpha mean acc ({all_mean_acc:.4f}) > 0.50 (random)',
       all_mean_acc > 0.50)
 
-# E: Feature counts correct
-check(f'E1: TS feature count == 17 (got {len(ts_cols)})',
-      len(ts_cols) == 17)
+# E: Feature counts correct (17 per-stock TS + 4 macro + 33 alpha = 54)
+MACRO_COLS = ['vix_level', 'vix_5d_chg', 'spy_20d_ret', 'yield_curve_slope']
+n_macro    = sum(1 for c in ts_cols if c in MACRO_COLS)
+n_ts_stock = len(ts_cols) - n_macro
+check(f'E1: TS feature count == 21 — 17 per-stock + 4 macro (got {len(ts_cols)})',
+      len(ts_cols) == 21)
 check(f'E2: alpha feature count == 33 (got {len(alpha_cols)})',
       len(alpha_cols) == 33)
-check(f'E3: total features == 50 (got {len(ts_cols)+len(alpha_cols)})',
-      len(ts_cols) + len(alpha_cols) == 50)
+check(f'E3: total features == 54 (got {len(ts_cols)+len(alpha_cols)})',
+      len(ts_cols) + len(alpha_cols) == 54)
+
+# E4: Macro features present and constant across tickers at each date
+macro_present = all(c in modelling.columns for c in MACRO_COLS)
+check('E4: all 4 macro feature columns present in modelling dataset',
+      macro_present)
+if macro_present:
+    macro_var = modelling.groupby(modelling.index)[MACRO_COLS].std().max().max()
+    check(f'E5: macro features identical across tickers on same date (max std={macro_var:.2e})',
+          macro_var < 1e-8)
 
 # F: Pooled modelling shape
 check(f'F: modelling rows >= 1500 (got {len(modelling)})',

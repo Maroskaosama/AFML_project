@@ -40,6 +40,7 @@ def run_per_stock_pipeline(
     corr_threshold: float = 0.85,
     verbose: bool = True,
     cusum_start: str = None,
+    min_ret: float = 0.0,
 ) -> dict:
     """
     Run AFML Stages 0-3 for a single stock and save artifacts.
@@ -106,6 +107,16 @@ def run_per_stock_pipeline(
 
     # Drop 0-label rows (exact zero return — very rare)
     labels = labels[labels['bin'] != 0]
+
+    # Minimum return filter: discard noise events where |ret| < min_ret.
+    # At 5 bps transaction cost, a 0.5% move barely breaks even.
+    if min_ret > 0.0:
+        n_before = len(labels)
+        labels = labels[labels['ret'].abs() >= min_ret]
+        if verbose:
+            dropped = n_before - len(labels)
+            print(f"  {ticker}: min_ret={min_ret:.3f} dropped {dropped} "
+                  f"({100*dropped/max(n_before,1):.1f}%) noise labels")
 
     if verbose:
         n_pos = (labels['bin'] == 1).sum()
