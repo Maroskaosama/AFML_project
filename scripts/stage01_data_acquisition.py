@@ -1,11 +1,11 @@
 """
-Phase 3: Data Acquisition — BAC/UNH universe, 2005-2025 panel rebuild.
+Phase 3: Data Acquisition — full universe, 2005-2025 panel rebuild.
 
 Steps:
   1. Safety snapshot of data/processed -> backups/
-  2. Download BAC and UNH raw CSVs (skip if already present and valid)
-  3. Validate all 10 stocks cover 2005-01-03
-  4. Rebuild panel_ohlcv.parquet with new 10-stock universe
+  2. Download any missing/invalid tickers from universe.json
+  3. Validate all universe stocks cover 2005-01-03
+  4. Rebuild panel_ohlcv.parquet with full universe
   5. Archive META/TSLA artifacts (raw CSVs + per_stock parquets)
   6. Validation summary
 """
@@ -23,7 +23,7 @@ import yfinance as yf
 with open('configs/universe.json') as f:
     UNI = json.load(f)
 
-TICKERS      = UNI['tickers']           # 10-stock list (BAC/UNH universe)
+TICKERS      = UNI['tickers']           # full universe ticker list
 COMMON_START = UNI['common_start']      # '2005-01-03'
 COMMON_END   = UNI['common_end']        # '2025-04-30'
 REQUIRED_COLS = ['Adj Close', 'Close', 'High', 'Low', 'Open', 'Volume']
@@ -64,12 +64,10 @@ os.makedirs(PANEL_DIR,    exist_ok=True)
 print('  Archive directories ready.')
 
 
-# ── Step 1: Download BAC and UNH ──────────────────────────────────────────
-sep('STEP 1: Download BAC and UNH raw CSVs')
+# ── Step 1: Download any missing/invalid tickers ─────────────────────────
+sep(f'STEP 1: Download missing tickers ({len(TICKERS)} in universe)')
 
-NEW_TICKERS = ['BAC', 'UNH']
-
-for ticker in NEW_TICKERS:
+for ticker in TICKERS:
     path = os.path.join(RAW_DIR, f'{ticker}_raw.csv')
 
     # Skip if already downloaded and valid
@@ -106,8 +104,8 @@ for ticker in NEW_TICKERS:
         ERRORS.append(msg)
 
 
-# ── Step 2: Validate all 10 stocks ───────────────────────────────────────
-sep('STEP 2: Validate all 10 raw CSVs')
+# ── Step 2: Validate all universe stocks ─────────────────────────────────
+sep(f'STEP 2: Validate all {len(TICKERS)} raw CSVs')
 
 stock_ok = {}
 for ticker in TICKERS:
@@ -155,7 +153,7 @@ if ERRORS:
 
 
 # ── Step 3: Rebuild panel_ohlcv.parquet ──────────────────────────────────
-sep('STEP 3: Rebuild panel_ohlcv.parquet (10 stocks, 2005-2025)')
+sep(f'STEP 3: Rebuild panel_ohlcv.parquet ({len(TICKERS)} stocks, 2005-2025)')
 
 frames = []
 for ticker in TICKERS:
@@ -216,18 +214,16 @@ print('  Phase 4 will regenerate them with the 2005-2025 date range.')
 sep('STEP 5: Validation')
 
 checks = {
-    'panel has 10 tickers':            len(tickers_in_panel) == 10,
-    'panel tickers match config':      set(tickers_in_panel) == set(TICKERS),
-    'panel starts at 2005-01-03':      date_min.date().isoformat() == COMMON_START,
-    'panel ends at 2025-04-30':        date_max.date().isoformat() == COMMON_END,
-    'panel has > 45000 rows':          n_rows > 45000,
-    'META not in panel':               'META' not in tickers_in_panel,
-    'TSLA not in panel':               'TSLA' not in tickers_in_panel,
-    'BAC in panel':                    'BAC' in tickers_in_panel,
-    'UNH in panel':                    'UNH' in tickers_in_panel,
-    'panel file exists':               os.path.exists(PANEL_OUT),
-    'panel (panel/) file exists':      os.path.exists(PANEL_OUT2),
-    'no NaN in AdjClose':              panel['AdjClose'].isnull().sum() == 0,
+    f'panel has {len(TICKERS)} tickers':  len(tickers_in_panel) == len(TICKERS),
+    'panel tickers match config':         set(tickers_in_panel) == set(TICKERS),
+    'panel starts at 2005-01-03':         date_min.date().isoformat() == COMMON_START,
+    'panel ends at 2025-04-30':           date_max.date().isoformat() == COMMON_END,
+    'panel has > 200000 rows':            n_rows > 200000,
+    'META not in panel':                  'META' not in tickers_in_panel,
+    'TSLA not in panel':                  'TSLA' not in tickers_in_panel,
+    'panel file exists':                  os.path.exists(PANEL_OUT),
+    'panel (panel/) file exists':         os.path.exists(PANEL_OUT2),
+    'no NaN in AdjClose':                 panel['AdjClose'].isnull().sum() == 0,
 }
 
 all_pass = True
@@ -245,5 +241,5 @@ if ERRORS:
         print(f'  {e}')
     sys.exit(1)
 else:
-    print('Phase 3 COMPLETE — panel_ohlcv rebuilt with BAC/UNH universe.')
+    print(f'Phase 3 COMPLETE — panel_ohlcv rebuilt with {len(tickers_in_panel)}-stock universe.')
     print(f'  {n_rows:,} rows | {len(tickers_in_panel)} tickers | {COMMON_START} to {COMMON_END}')

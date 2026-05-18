@@ -1,74 +1,74 @@
-AFML Pipeline Final Audit — 2026-05-17 21:09
-Universe : ['AAPL', 'AMZN', 'NVDA', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'XOM', 'BAC', 'UNH']
+AFML Pipeline Final Audit — 2026-05-18 22:35
+Universe : ['AAPL', 'MSFT', 'NVDA', 'ORCL', 'CSCO', 'IBM', 'INTC', 'TXN', 'QCOM', 'JPM', 'BAC', 'WFC', 'GS', 'AXP', 'USB', 'C', 'COF', 'UNH', 'JNJ', 'ABT', 'MRK', 'PFE', 'AMGN', 'MDT', 'PG', 'KO', 'WMT', 'PEP', 'COST', 'MO', 'AMZN', 'HD', 'MCD', 'NKE', 'LOW', 'GOOGL', 'VZ', 'T', 'CMCSA', 'XOM', 'CVX', 'COP', 'CAT', 'GE', 'HON', 'MMM', 'APD', 'NEM', 'NEE', 'SO']
 Period   : 2005-01-03 -> 2025-04-30
-Events   : 2071 (10 stocks)
-Features : 50 total (17 TS + 33 alpha)
+Events   : 11890 (50 stocks)
+Features : 54 total (21 TS + 33 alpha)
 
 Result   : 33/33 checks PASS  |  0 FAIL
 
 Check-by-check:
-  [OK  ] D1 – Panel has all 10 universe tickers
-         tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']
+  [OK  ] D1 – Panel has all 50 universe tickers
+         tickers=['AAPL', 'ABT', 'AMGN', 'AMZN', 'APD', 'AXP', 'BAC', 'C', 'CAT', 'CMCSA', 'COF', 'COP', 'COST', 'CSCO', 'CVX', 'GE', 'GOOGL', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'LOW', 'MCD', 'MDT', 'MMM', 'MO', 'MRK', 'MSFT', 'NEE', 'NEM', 'NKE', 'NVDA', 'ORCL', 'PEP', 'PFE', 'PG', 'QCOM', 'SO', 'T', 'TXN', 'UNH', 'USB', 'VZ', 'WFC', 'WMT', 'XOM']
   [OK  ] D2 – Panel date range covers 2005-01-03 to 2025-04-30
          range=2005-01-03 -> 2025-04-30
   [OK  ] D3 – Panel has zero NaN values
          NaN count=0
-  [OK  ] D4 – Pooled modelling has 2071 events across 10 tickers
-         n=2071  tickers=['AAPL', 'AMZN', 'BAC', 'GOOGL', 'JNJ', 'JPM', 'MSFT', 'NVDA', 'UNH', 'XOM']
+  [OK  ] D4 – Pooled modelling covers all 50 tickers (>= 5000 events)
+         n=11890  tickers=['AAPL', 'ABT', 'AMGN', 'AMZN', 'APD', 'AXP', 'BAC', 'C', 'CAT', 'CMCSA', 'COF', 'COP', 'COST', 'CSCO', 'CVX', 'GE', 'GOOGL', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'LOW', 'MCD', 'MDT', 'MMM', 'MO', 'MRK', 'MSFT', 'NEE', 'NEM', 'NKE', 'NVDA', 'ORCL', 'PEP', 'PFE', 'PG', 'QCOM', 'SO', 'T', 'TXN', 'UNH', 'USB', 'VZ', 'WFC', 'WMT', 'XOM']
   [OK  ] L1 – All 34 leakage checks PASS (Phase 6)
-         PASS=34  WARN=0  FAIL=0
+         PASS=34  WARN=1  FAIL=0
   [OK  ] L2 – t1 > event_date for all pooled events (no retroactive exits)
          violations=0
   [OK  ] L3 – No forward-looking: OOS predictions use only past data
          fold range=0-4
-  [OK  ] F1 – 50 features total: 17 TS + 33 alpha
-         TS=17  alpha=33
+  [OK  ] F1 – 54 features total: 21 TS (17 per-stock + 4 macro) + 33 alpha
+         TS=21  alpha=33
   [OK  ] F2 – MDI importances sum to ~1.0 (within 1%)
          MDI sum=1.000000
   [OK  ] F3 – No single feature dominates MDI > 15%
-         max MDI=0.0500  feature=ret_10d
-  [OK  ] F4 – Top feature by avg tri-method rank is alpha009
-         top feature=alpha009  avg_rank=3.00
+         max MDI=0.1314  feature=vix_level
+  [OK  ] F4 – Top feature by avg tri-method rank has positive MDI mean
+         top feature=spy_20d_ret  avg_rank=7.33  MDI=0.0945
   [OK  ] F5 – Fewer than 5 features have near-zero MDI (correlated ensemble masking expected)
-         near-zero MDI count=2  features=['alpha007', 'alpha027']
+         near-zero MDI count=0  features=[]
   [OK  ] W1 – All sample weights > 0
          non-positive count=0
   [OK  ] W2 – Max weight (clipped at p99) <= 3.5
-         max weight=2.9426
+         max weight=3.1410
   [OK  ] W3 – Mean weight in (0.5, 2.0)
-         mean weight=1.0074
+         mean weight=1.0000
   [OK  ] C1 – Phase 11 OOS accuracy > 0.50
-         OOS acc=0.5601
-  [OK  ] C2 – OOS predictions cover all 2071 events exactly once
-         covered=2071
+         OOS acc=0.5279
+  [OK  ] C2 – OOS predictions cover all 11890 events exactly once
+         covered=11890
   [OK  ] C3 – CPCV mean OOS accuracy > 0.50 (all 15 splits)
-         CPCV mean acc=0.5620
+         CPCV mean acc=0.5224
   [OK  ] C4 – Each event appears in exactly C(K-1,p-1)=5 CPCV test splits
          appearances: mean=5.00  min=5  max=5
   [OK  ] M1 – Meta-label class-1 rate matches primary OOS accuracy (within 0.005)
-         meta class1=0.5601  primary acc=0.5601  diff=0.0000
+         meta class1=0.5279  primary acc=0.5279  diff=0.0000
   [OK  ] M2 – Meta OOS accuracy > 0.50
-         meta OOS acc=0.5191
+         meta OOS acc=0.5274
   [OK  ] M3 – Meta-filtered profitability >= all-trades profitability
-         meta-filtered=0.5945  all-trades=0.5601  lift=+0.0344
+         meta-filtered=0.5629  all-trades=0.5279  lift=+0.0350
   [OK  ] B1 – Portfolio_A Sharpe Ratio > 0
-         SR=1.0604
+         SR=0.1394
   [OK  ] B2 – Portfolio_A DSR > 0 (survives multiple-testing correction, N=60)
-         DSR=0.9719
+         DSR=0.0376
   [OK  ] B3 – Portfolio_A max drawdown <= 35%
-         max_dd=22.9819%
+         max_dd=33.7034%
   [OK  ] B4 – Portfolio_A annualised return > 0%
-         ann_ret=14.3418%
-  [OK  ] B5 – At least 8/10 tickers have positive SR_A
-         positive SR tickers=10/10  (AAPL:0.72, AMZN:0.52, NVDA:1.26, GOOGL:0.60, JNJ:0.52, JPM:0.75, MSFT:0.89, XOM:0.23, BAC:0.60, UNH:0.73)
-  [OK  ] B6 – NVDA has highest SR_A (top tech performer)
-         NVDA SR=1.2649  max=1.2649
+         ann_ret=1.3717%
+  [OK  ] B5 – At least 30/50 tickers have positive SR_A (>=60%)
+         positive SR tickers=30/50  (AAPL:0.48, MSFT:0.30, NVDA:-0.11, ORCL:-0.16, CSCO:-0.24, IBM:-0.40, INTC:0.08, TXN:0.49, QCOM:0.38, JPM:-0.25, BAC:-0.11, WFC:-0.23, GS:-0.26, AXP:0.00, USB:0.05, C:0.02, COF:-0.30, UNH:0.03, JNJ:0.55, ABT:0.37, MRK:0.45, PFE:-0.02, AMGN:-0.06, MDT:0.09, PG:0.37, KO:0.45, WMT:-0.16, PEP:0.41, COST:0.31, MO:0.20, AMZN:0.11, HD:0.53, MCD:0.62, NKE:0.68, LOW:0.28, GOOGL:-0.17, VZ:-0.11, T:-0.12, CMCSA:-0.06, XOM:-0.09, CVX:0.13, COP:0.34, CAT:-0.32, GE:-0.28, HON:0.12, MMM:0.27, APD:0.29, NEM:-0.36, NEE:0.09, SO:0.11)
+  [OK  ] B6 – NVDA SR_A not among the 3 worst tickers (not catastrophically weak signal)
+         worst-3=['CAT', 'NEM', 'IBM']  NVDA SR=-0.1096
   [OK  ] R1 – 100% of CPCV paths have SR > 0
          % positive=100.0%  n_paths=15
-  [OK  ] R2 – CPCV SR std < 0.10 (consistent across resamples)
-         SR std=0.0320
-  [OK  ] R3 – CPCV mean SR within 20% of Phase 13 portfolio SR
-         CPCV mean SR=1.0398  Phase 13 SR=1.0604  ratio=0.9805
+  [OK  ] R2 – CPCV SR std < 0.25 (consistent across resamples)
+         SR std=0.1474
+  [OK  ] R3 – CPCV mean SR within 2x of Portfolio_B SR (signal quality vs cost-adjusted)
+         CPCV mean SR=0.5054  Portfolio_B SR=0.4294  ratio=1.1769
   [OK  ] A1 – All 14 required data artifacts exist
          all present
   [OK  ] A2 – All key phase figures (10-14) exist

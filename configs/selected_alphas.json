@@ -13,6 +13,8 @@
     "alpha012",
     "alpha013",
     "alpha014",
+    "alpha015",
+    "alpha016",
     "alpha017",
     "alpha018",
     "alpha019",
@@ -30,29 +32,21 @@
     "alpha033",
     "alpha034",
     "alpha035",
-    "alpha036",
-    "alpha037",
-    "alpha038"
+    "alpha036"
   ],
   "n_alphas": 33,
   "excluded_nan40": [
-    "alpha003",
-    "alpha015",
-    "alpha044",
     "alpha050",
-    "alpha055",
     "alpha056",
-    "alpha078",
     "alpha092",
     "alpha096",
     "alpha097",
-    "alpha098",
     "alpha100"
   ],
   "excluded_constant": [],
   "excluded_inf": [],
   "pruned_redundant": [
-    "alpha016",
+    "alpha098",
     "alpha101",
     "alpha083",
     "alpha051"

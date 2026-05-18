@@ -200,7 +200,7 @@ bnh_ret_wide = np.log(bnh_prices / bnh_prices.shift(1)).dropna(how='all')
 port_BnH = bnh_ret_wide.mean(axis=1)   # equal-weight daily log-return
 
 print(f'  Buy-and-hold SR: {sharpe_ratio(port_BnH, PPY):+.4f}  '
-      f'(period {bnh_start.date()} → {bnh_end.date()})')
+      f'(period {bnh_start.date()} -> {bnh_end.date()})')
 
 # Portfolio stats
 rows.append(stats_row('Portfolio_A',   port_A))

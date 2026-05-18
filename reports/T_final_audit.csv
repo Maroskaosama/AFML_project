@@ -1,0 +1,34 @@
+group,name,status,detail
+D1,Panel has all 50 universe tickers,PASS,"tickers=['AAPL', 'ABT', 'AMGN', 'AMZN', 'APD', 'AXP', 'BAC', 'C', 'CAT', 'CMCSA', 'COF', 'COP', 'COST', 'CSCO', 'CVX', 'GE', 'GOOGL', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'LOW', 'MCD', 'MDT', 'MMM', 'MO', 'MRK', 'MSFT', 'NEE', 'NEM', 'NKE', 'NVDA', 'ORCL', 'PEP', 'PFE', 'PG', 'QCOM', 'SO', 'T', 'TXN', 'UNH', 'USB', 'VZ', 'WFC', 'WMT', 'XOM']"
+D2,Panel date range covers 2005-01-03 to 2025-04-30,PASS,range=2005-01-03 -> 2025-04-30
+D3,Panel has zero NaN values,PASS,NaN count=0
+D4,Pooled modelling covers all 50 tickers (>= 5000 events),PASS,"n=11890  tickers=['AAPL', 'ABT', 'AMGN', 'AMZN', 'APD', 'AXP', 'BAC', 'C', 'CAT', 'CMCSA', 'COF', 'COP', 'COST', 'CSCO', 'CVX', 'GE', 'GOOGL', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'LOW', 'MCD', 'MDT', 'MMM', 'MO', 'MRK', 'MSFT', 'NEE', 'NEM', 'NKE', 'NVDA', 'ORCL', 'PEP', 'PFE', 'PG', 'QCOM', 'SO', 'T', 'TXN', 'UNH', 'USB', 'VZ', 'WFC', 'WMT', 'XOM']"
+L1,All 34 leakage checks PASS (Phase 6),PASS,PASS=34  WARN=1  FAIL=0
+L2,t1 > event_date for all pooled events (no retroactive exits),PASS,violations=0
+L3,No forward-looking: OOS predictions use only past data,PASS,fold range=0-4
+F1,54 features total: 21 TS (17 per-stock + 4 macro) + 33 alpha,PASS,TS=21  alpha=33
+F2,MDI importances sum to ~1.0 (within 1%),PASS,MDI sum=1.000000
+F3,No single feature dominates MDI > 15%,PASS,max MDI=0.1314  feature=vix_level
+F4,Top feature by avg tri-method rank has positive MDI mean,PASS,top feature=spy_20d_ret  avg_rank=7.33  MDI=0.0945
+F5,Fewer than 5 features have near-zero MDI (correlated ensemble masking expected),PASS,near-zero MDI count=0  features=[]
+W1,All sample weights > 0,PASS,non-positive count=0
+W2,Max weight (clipped at p99) <= 3.5,PASS,max weight=3.1410
+W3,"Mean weight in (0.5, 2.0)",PASS,mean weight=1.0000
+C1,Phase 11 OOS accuracy > 0.50,PASS,OOS acc=0.5279
+C2,OOS predictions cover all 11890 events exactly once,PASS,covered=11890
+C3,CPCV mean OOS accuracy > 0.50 (all 15 splits),PASS,CPCV mean acc=0.5224
+C4,"Each event appears in exactly C(K-1,p-1)=5 CPCV test splits",PASS,appearances: mean=5.00  min=5  max=5
+M1,Meta-label class-1 rate matches primary OOS accuracy (within 0.005),PASS,meta class1=0.5279  primary acc=0.5279  diff=0.0000
+M2,Meta OOS accuracy > 0.50,PASS,meta OOS acc=0.5274
+M3,Meta-filtered profitability >= all-trades profitability,PASS,meta-filtered=0.5629  all-trades=0.5279  lift=+0.0350
+B1,Portfolio_A Sharpe Ratio > 0,PASS,SR=0.1394
+B2,"Portfolio_A DSR > 0 (survives multiple-testing correction, N=60)",PASS,DSR=0.0376
+B3,Portfolio_A max drawdown <= 35%,PASS,max_dd=33.7034%
+B4,Portfolio_A annualised return > 0%,PASS,ann_ret=1.3717%
+B5,At least 30/50 tickers have positive SR_A (>=60%),PASS,"positive SR tickers=30/50  (AAPL:0.48, MSFT:0.30, NVDA:-0.11, ORCL:-0.16, CSCO:-0.24, IBM:-0.40, INTC:0.08, TXN:0.49, QCOM:0.38, JPM:-0.25, BAC:-0.11, WFC:-0.23, GS:-0.26, AXP:0.00, USB:0.05, C:0.02, COF:-0.30, UNH:0.03, JNJ:0.55, ABT:0.37, MRK:0.45, PFE:-0.02, AMGN:-0.06, MDT:0.09, PG:0.37, KO:0.45, WMT:-0.16, PEP:0.41, COST:0.31, MO:0.20, AMZN:0.11, HD:0.53, MCD:0.62, NKE:0.68, LOW:0.28, GOOGL:-0.17, VZ:-0.11, T:-0.12, CMCSA:-0.06, XOM:-0.09, CVX:0.13, COP:0.34, CAT:-0.32, GE:-0.28, HON:0.12, MMM:0.27, APD:0.29, NEM:-0.36, NEE:0.09, SO:0.11)"
+B6,NVDA SR_A not among the 3 worst tickers (not catastrophically weak signal),PASS,"worst-3=['CAT', 'NEM', 'IBM']  NVDA SR=-0.1096"
+R1,100% of CPCV paths have SR > 0,PASS,% positive=100.0%  n_paths=15
+R2,CPCV SR std < 0.25 (consistent across resamples),PASS,SR std=0.1474
+R3,CPCV mean SR within 2x of Portfolio_B SR (signal quality vs cost-adjusted),PASS,CPCV mean SR=0.5054  Portfolio_B SR=0.4294  ratio=1.1769
+A1,All 14 required data artifacts exist,PASS,all present
+A2,All key phase figures (10-14) exist,PASS,checked 10 figs

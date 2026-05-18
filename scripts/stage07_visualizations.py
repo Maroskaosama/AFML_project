@@ -47,8 +47,8 @@ FIGURES_DIR  = 'reports/figures'
 PER_STOCK    = 'data/processed/per_stock'
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
-COLORS = plt.cm.tab10.colors
-TICKER_COLOR = {t: COLORS[i] for i, t in enumerate(sorted(TICKERS))}
+_palette = list(plt.cm.tab20.colors) + list(plt.cm.tab20b.colors) + list(plt.cm.tab20c.colors)
+TICKER_COLOR = {t: _palette[i % len(_palette)] for i, t in enumerate(sorted(TICKERS))}
 
 ERRORS = []
 saved  = []
@@ -120,7 +120,9 @@ save_fig('01_price_history', fig)
 # ── Figure 02: Returns distribution ──────────────────────────────────────────
 sep('Fig 02: Log-return distribution per stock')
 
-fig, axes = plt.subplots(2, 5, figsize=(16, 6), sharey=False)
+_n_cols = 5
+_n_rows = (len(TICKERS) + _n_cols - 1) // _n_cols
+fig, axes = plt.subplots(_n_rows, _n_cols, figsize=(16, _n_rows * 3), sharey=False)
 axes = axes.flatten()
 
 for i, ticker in enumerate(sorted(TICKERS)):
@@ -338,7 +340,7 @@ for i in range(n_ts):
         if abs(val) > 0.5:
             ax.text(j, i, f'{val:.2f}', ha='center', va='center', fontsize=5, color='white')
 plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-ax.set_title(f'17 TS Feature Correlation (pooled 10-stock, n={len(X_ts)})')
+ax.set_title(f'{len(ts_cols)} TS Feature Correlation (pooled {len(TICKERS)}-stock, n={len(X_ts)})')
 plt.tight_layout()
 save_fig('07_feature_correlation_ts', fig)
 
@@ -363,7 +365,7 @@ ax.text(len(ts_cols) / 2, -2.5, 'TS features', ha='center', fontsize=8, fontweig
 ax.text(len(ts_cols) + len(alpha_cols) / 2, -2.5, 'Alpha features', ha='center', fontsize=8, fontweight='bold')
 
 plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-ax.set_title(f'50-Feature Correlation (17 TS + 33 alpha, pooled 10-stock, n={len(X_all)})')
+ax.set_title(f'{len(feat_cols)}-Feature Correlation ({len(ts_cols)} TS + {len(alpha_cols)} alpha, pooled {len(TICKERS)}-stock, n={len(X_all)})')
 plt.tight_layout()
 save_fig('08_feature_correlation_all', fig)
 

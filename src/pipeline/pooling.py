@@ -109,15 +109,25 @@ def build_pooled_modelling_dataset(
         weight_series = weights.iloc[:, 0].rename('weight') if weights.shape[1] > 0 \
                         else pd.Series(1.0, index=labels.index, name='weight')
 
-        parts = [ts_feat[ts_cols]]
-        if macro_features is not None:
-            parts.append(macro_features.reindex(labels.index))
-        parts += [alpha_aligned, label_series, t1_col.rename('t1'), weight_series]
-        row = pd.concat(parts, axis=1)
+        ts_part    = ts_feat[ts_cols]
+        macro_part = macro_features.reindex(labels.index) if macro_features is not None else None
+
+        # Build non-alpha part first; drop rows where TS/macro are NaN
+        non_alpha_parts = [ts_part]
+        if macro_part is not None:
+            non_alpha_parts.append(macro_part)
+        non_alpha_parts += [label_series, t1_col.rename('t1'), weight_series]
+        row = pd.concat(non_alpha_parts, axis=1).dropna()
+
+        if len(row) == 0:
+            skipped.append((ticker, 'all rows NaN in TS/macro features'))
+            continue
+
+        # Alpha NaN → 0 (neutral cross-sectional rank; avoids dropping entire stocks)
+        alpha_clean = alpha_aligned.reindex(row.index).fillna(0.0)
+        row = pd.concat([row, alpha_clean], axis=1)
 
         row['ticker'] = ticker
-        row = row.dropna()
-
         pooled_rows.append(row)
 
     if not pooled_rows:

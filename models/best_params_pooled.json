@@ -1,39 +1,81 @@
 {
   "rf": {
     "params": {
-      "n_estimators": 300,
+      "n_estimators": 200,
       "min_samples_leaf": 3,
-      "max_features": 0.5,
-      "max_depth": 4,
-      "class_weight": null
+      "max_features": "sqrt",
+      "max_depth": null,
+      "class_weight": "balanced_subsample"
     },
-    "mean_score": 0.5600899160345276,
-    "std_score": 0.02687928850835659,
-    "n_features": 50,
-    "dsr": 0.9588928128019018,
-    "best_sr": 20.83722996836019,
-    "n_trials": 30
+    "mean_score": 0.5252728734813077,
+    "std_score": 0.01547260029393319,
+    "n_features": 54,
+    "dsr": 0.9999253735682734,
+    "best_sr": 33.94858417477942,
+    "n_trials": 30,
+    "oos_metrics": {
+      "accuracy": 0.544322960470984,
+      "balanced_accuracy": 0.5044404645340653,
+      "mcc": 0.026285719404446913,
+      "macro_f1": 0.381395762779311,
+      "precision": 0.5446591007537035,
+      "recall": 0.9748798263296635,
+      "f1": 0.6988661627389952,
+      "auc_roc": 0.5196335553392232,
+      "pr_auc": 0.5602709415050456
+    }
   },
   "xgb": {
     "params": {
-      "subsample": 0.6,
-      "reg_lambda": 1.0,
-      "n_estimators": 100,
+      "subsample": 0.8,
+      "reg_lambda": 10.0,
+      "n_estimators": 200,
       "max_depth": 3,
-      "learning_rate": 0.01,
-      "gamma": 0.5,
-      "colsample_bytree": 1.0
+      "learning_rate": 0.05,
+      "gamma": 0.1,
+      "colsample_bytree": 0.7
     },
-    "mean_score": 0.5663568851944973,
-    "std_score": 0.02448940114742635,
-    "n_features": 50,
-    "dsr": 0.9975669422575686,
-    "best_sr": 23.12661227545032,
-    "n_trials": 30
+    "mean_score": 0.5261939337961061,
+    "std_score": 0.027573389968924153,
+    "n_features": 54,
+    "dsr": 0.4514944063798476,
+    "best_sr": 19.083396506165503,
+    "n_trials": 30,
+    "oos_metrics": {
+      "accuracy": 0.543313708999159,
+      "balanced_accuracy": 0.5039266284208824,
+      "mcc": 0.02126810660318155,
+      "macro_f1": 0.38504145024479014,
+      "precision": 0.5444086115227055,
+      "recall": 0.9685222515118623,
+      "f1": 0.697020421827921,
+      "auc_roc": 0.5231762031238899,
+      "pr_auc": 0.5631738318617316
+    }
+  },
+  "ensemble": {
+    "oos_metrics": {
+      "accuracy": 0.5279226240538267,
+      "balanced_accuracy": 0.5205911201424925,
+      "mcc": 0.041688090321794026,
+      "macro_f1": 0.5197292009125111,
+      "precision": 0.5597655132971118,
+      "recall": 0.6070708636997985,
+      "f1": 0.5824592724838206,
+      "auc_roc": 0.5241457517366763,
+      "pr_auc": 0.5654042334573945
+    },
+    "pca_components_per_fold": [
+      5,
+      5,
+      5,
+      5,
+      7
+    ]
   },
   "feature_selection": {
-    "n_total": 50,
-    "n_kept": 50,
+    "n_total": 54,
+    "n_kept": 54,
     "n_dropped": 0,
     "dropped": [],
     "kept": [
@@ -54,6 +96,10 @@
       "shannon_entropy",
       "lempel_ziv_complexity",
       "fracdiff",
+      "vix_level",
+      "vix_5d_chg",
+      "spy_20d_ret",
+      "yield_curve_slope",
       "alpha001",
       "alpha002",
       "alpha004",
@@ -67,6 +113,8 @@
       "alpha012",
       "alpha013",
       "alpha014",
+      "alpha015",
+      "alpha016",
       "alpha017",
       "alpha018",
       "alpha019",
@@ -84,15 +132,70 @@
       "alpha033",
       "alpha034",
       "alpha035",
-      "alpha036",
-      "alpha037",
-      "alpha038"
+      "alpha036"
+    ],
+    "ts_keep": [
+      "ret_5d",
+      "ret_10d",
+      "ret_20d",
+      "ret_60d",
+      "momentum_12_1",
+      "rsi_14",
+      "vol_20d",
+      "vol_50d",
+      "log_dollar_volume",
+      "volume_ratio",
+      "corwin_schultz_spread",
+      "bekker_parkinson_vol",
+      "amihud_illiquidity",
+      "roll_spread",
+      "shannon_entropy",
+      "lempel_ziv_complexity",
+      "fracdiff",
+      "vix_level",
+      "vix_5d_chg",
+      "spy_20d_ret",
+      "yield_curve_slope"
+    ],
+    "alpha_keep": [
+      "alpha001",
+      "alpha002",
+      "alpha004",
+      "alpha005",
+      "alpha006",
+      "alpha007",
+      "alpha008",
+      "alpha009",
+      "alpha010",
+      "alpha011",
+      "alpha012",
+      "alpha013",
+      "alpha014",
+      "alpha015",
+      "alpha016",
+      "alpha017",
+      "alpha018",
+      "alpha019",
+      "alpha020",
+      "alpha021",
+      "alpha022",
+      "alpha023",
+      "alpha025",
+      "alpha026",
+      "alpha027",
+      "alpha028",
+      "alpha029",
+      "alpha030",
+      "alpha031",
+      "alpha033",
+      "alpha034",
+      "alpha035",
+      "alpha036"
     ],
     "alpha_in_top10_avg": [
-      "alpha009",
-      "alpha012",
-      "alpha030"
+      "alpha011",
+      "alpha034"
     ]
   },
-  "majority_baseline": 0.5663930468372766
+  "majority_baseline": 0.5423885618166526
 }

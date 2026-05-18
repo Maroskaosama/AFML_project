@@ -661,7 +661,7 @@ if ERRORS:
 else:
     print(f'Phase 11 COMPLETE — {passed} checks passed.')
     print(f'  Features used  : {len(keep_feats)} / {len(feat_cols)} (dropped {len(drop_feats)})')
-    print(f'  Alpha keep     : {len(alpha_keep)}  →  PCA {fold_pca_n} components (per fold)')
+    print(f'  Alpha keep     : {len(alpha_keep)}  ->  PCA {fold_pca_n} components (per fold)')
     print(f'  RF  HP acc     : {rf_result["best_mean_score"]:.4f}')
     print(f'  XGB HP acc     : {xgb_result["best_mean_score"]:.4f}')
     print(f'  OOS accuracy   : RF={rf_oos_metrics["accuracy"]:.4f}  '
